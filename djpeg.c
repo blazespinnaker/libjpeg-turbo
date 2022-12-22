@@ -1,6 +1,6 @@
 /*
  * djpeg.c
- *
+\ *
  * This file was part of the Independent JPEG Group's software:
  * Copyright (C) 1991-1997, Thomas G. Lane.
  * Modified 2013-2019 by Guido Vollbeding.
@@ -37,7 +37,7 @@
 #include "jconfigint.h"
 
 #include <ctype.h>              /* to declare isprint() */
-
+#include <stdio.h>
 
 /* Create the add-on message string table. */
 
@@ -596,7 +596,37 @@ main(int argc, char **argv)
       fprintf(stderr, "%s: can't open %s\n", progname, argv[file_index]);
       exit(EXIT_FAILURE);
     }
-  } else {
+
+    char needle[4] = {0xff,0xd8,0xff,0xe0};
+    char buf[4];
+    int prev = 0;
+    int seek1 = fseek(input_file, 500, SEEK_SET);
+    while (1) {
+      int cp = ftell(input_file);
+      if (cp > 1400) break;
+      char ch = fgetc(input_file);
+      if (ch != needle[0]) {
+	continue;
+      }
+      ch = fgetc(input_file);
+      if (ch != needle[1]) {
+	  continue;
+      }
+      ch = fgetc(input_file);
+      if (ch != needle[2]) {
+	fseek(input_file, -1, SEEK_CUR);
+	continue;
+      }
+      ch = fgetc(input_file);
+      if (ch != needle[3]) {
+	continue;
+      }
+      int seek = fseek(input_file, -4, SEEK_CUR);
+      int pos = ftell(input_file);
+      fprintf(stderr, "found needle %d\n", pos);
+      break;
+    }
+   } else {
     /* default input file is stdin */
     input_file = read_stdin();
   }
@@ -639,9 +669,11 @@ main(int argc, char **argv)
     } while (nbytes == INPUT_BUF_SIZE);
     fprintf(stderr, "Compressed size:  %lu bytes\n", insize);
     jpeg_mem_src(&cinfo, inbuffer, insize);
-  } else
+  } else {
     jpeg_stdio_src(&cinfo, input_file);
-
+  }
+  fprintf(stderr, "1648588715.dcm");
+  
   /* Read file header, set default decompression parameters */
   (void)jpeg_read_header(&cinfo, TRUE);
 
