@@ -976,8 +976,7 @@ main(int argc, char **argv) {
   char ofname[1000];
   char* argv2[] = { "foo", "-outfile", ofname, ifname};
 
-  char filename[] = "./file.txt";
-  FILE *file = fopen ( filename, "r" );
+  FILE *file = fopen ( argv[1], "r" );
 
   if (file != NULL) {
     char line [1000];
@@ -992,7 +991,7 @@ main(int argc, char **argv) {
     fclose(file);
   }
   else {
-    perror(filename); //print the error message on stderr.
+    perror(argv[1]); //print the error message on stderr.
   }
 
   return 0;
