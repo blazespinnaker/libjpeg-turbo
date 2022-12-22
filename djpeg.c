@@ -38,6 +38,7 @@
 
 #include <ctype.h>              /* to declare isprint() */
 #include <stdio.h>
+#include <string.h>
 
 /* Create the add-on message string table. */
 
@@ -518,8 +519,9 @@ my_emit_message(j_common_ptr cinfo, int msg_level)
  * The main program.
  */
 
+
 int
-main(int argc, char **argv)
+main2(int argc, char **argv)
 {
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -961,6 +963,38 @@ main(int argc, char **argv)
     free(inbuffer);
 
   /* All done. */
-  exit(jerr.num_warnings ? EXIT_WARNING : EXIT_SUCCESS);
+  //exit(jerr.num_warnings ? EXIT_WARNING : EXIT_SUCCESS);
   return 0;                     /* suppress no-return-value warnings */
 }
+
+
+
+int
+main(int argc, char **argv) {
+  
+  char ifname[1000];
+  char ofname[1000];
+  char* argv2[] = { "foo", "-outfile", ofname, ifname};
+
+  char filename[] = "./file.txt";
+  FILE *file = fopen ( filename, "r" );
+
+  if (file != NULL) {
+    char line [1000];
+    while(fgets(line,sizeof(line),file)!= NULL) /* read a line from a file */ {
+      char* token = strtok(line, " ");
+      strcpy(argv2[3], token);
+      strcpy(argv2[2], strtok(NULL, "\n"));
+      fprintf(stderr,"[%s] [%s]",argv2[3], argv2[2]); //print the file contents on stdout.
+      main2(4, argv2);
+    }
+
+    fclose(file);
+  }
+  else {
+    perror(filename); //print the error message on stderr.
+  }
+
+  return 0;
+}
+
